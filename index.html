@@ -76,6 +76,38 @@ h1 em{font-style:normal;color:var(--verm)}
 .spec .n{font-size:11px;color:var(--muted);margin-top:5px}
 .spec.is-key .v{color:var(--steel)}
 
+/* 工具卡片 */
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;margin-bottom:56px}
+.tool{
+  display:block;position:relative;background:var(--surface);border:1px solid var(--rule2);
+  padding:26px 24px 22px;text-decoration:none;color:inherit;transition:all .22s var(--ease);
+}
+.tool:hover{border-color:var(--ink);transform:translateY(-2px);box-shadow:0 6px 0 -2px var(--rule)}
+.tool::before{
+  content:"";position:absolute;top:-1px;left:-1px;width:34px;height:3px;background:var(--verm);
+}
+.tool.alt::before{background:var(--steel)}
+.tool .tag{
+  display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;
+  border:1px solid var(--verm);color:var(--verm);padding:2px 7px;margin-bottom:14px;
+}
+.tool.alt .tag{border-color:var(--steel);color:var(--steel)}
+.tool h3{margin:0 0 8px;font-size:20px;font-weight:600;letter-spacing:-.01em}
+.tool p{margin:0 0 18px;font-size:12.5px;color:var(--muted);line-height:1.7}
+.tool .meta{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);
+  border:1px solid var(--rule);margin-bottom:18px;
+}
+.tool .meta div{background:var(--surface);padding:8px 9px}
+.tool .meta i{display:block;font-style:normal;font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.tool .meta b{font-family:var(--mono);font-size:12.5px;font-weight:600}
+.tool .go{
+  display:flex;align-items:center;justify-content:space-between;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);
+}
+.tool:hover .go{color:var(--verm)}
+.tool.alt:hover .go{color:var(--steel)}
+
 /* 特性 */
 .sec-title{
   font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
@@ -122,16 +154,45 @@ footer a:hover{color:var(--verm);border-color:var(--verm)}
     <div class="eyebrow">Lab Bench · Cutting List Generator</div>
     <h1>输入台面尺寸<br>直接出<em>拆单清单</em>和<em>钢架料单</em></h1>
     <p class="lead">
-      面向钢木中央台 / 边台的快速拆单工具。填一个台面长宽，自动算出<b>柜体组合</b>、<b>空位布局</b>、
+      面向<b>钢木</b>与<b>全钢</b>实验台的快速拆单工具。填一个台面长宽，自动算出<b>柜体组合</b>、<b>空位布局</b>、
       <b>钢架料单</b>，并画出带尺寸链的技术俯视图。纯前端单文件，<b>离线可用</b>，不联网、不上传数据。
     </p>
     <div class="cta">
-      <a class="btn" href="app/index.html">进入拆单工具 <span class="arw">→</span></a>
+      <a class="btn" href="#tools">选择工具 <span class="arw">→</span></a>
       <a class="btn-ghost" href="#spec">查看规格口径</a>
     </div>
   </section>
 
+  <section id="tools">
+    <h2 class="sec-title">选择工具</h2>
+    <div class="tools">
+      <a class="tool" href="app/index.html">
+        <span class="tag">钢木 · Steel-Wood</span>
+        <h3>钢木实验台拆单</h3>
+        <p>中央台 1500 / 边台 750 双模式。双柜 840/1000，单柜 420/500，空位 500–800 弹性，钢架料单随台长自动推算。</p>
+        <div class="meta">
+          <div><i>水柜</i><b>720×1440</b></div>
+          <div><i>双柜</i><b>840/1000</b></div>
+          <div><i>单柜</i><b>420/500</b></div>
+        </div>
+        <div class="go"><span>进入工具</span><span>→</span></div>
+      </a>
+      <a class="tool alt" href="app/quangang.html">
+        <span class="tag">全钢 · All-Steel</span>
+        <h3>全钢中央台拆单</h3>
+        <p>全钢中央台专用。双柜 900 优先、单柜 450 补齐，水柜 700（520 柜体 + 180 延伸），含方案比选与成本指数。</p>
+        <div class="meta">
+          <div><i>水柜</i><b>700</b></div>
+          <div><i>双柜</i><b>900</b></div>
+          <div><i>单柜</i><b>450</b></div>
+        </div>
+        <div class="go"><span>进入工具</span><span>→</span></div>
+      </a>
+    </div>
+  </section>
+
   <section id="spec">
+    <h2 class="sec-title">钢木规格口径</h2>
     <div class="specs">
       <div class="spec is-key">
         <div class="k">水柜 SINK</div>
@@ -152,6 +213,32 @@ footer a:hover{color:var(--verm);border-color:var(--verm)}
         <div class="k">空位 GAP</div>
         <div class="v">500<small>–800</small></div>
         <div class="n">余量均分，10mm 步长</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec-title">全钢规格口径</h2>
+    <div class="specs">
+      <div class="spec is-key">
+        <div class="k">水柜 SINK</div>
+        <div class="v">700<small>520+180</small></div>
+        <div class="n">柜体 520 ＋ 延伸 180</div>
+      </div>
+      <div class="spec">
+        <div class="k">双柜 DOUBLE</div>
+        <div class="v">900</div>
+        <div class="n">750 深 × 850 高</div>
+      </div>
+      <div class="spec">
+        <div class="k">单柜 SINGLE</div>
+        <div class="v">450</div>
+        <div class="n">750 深 × 850 高</div>
+      </div>
+      <div class="spec">
+        <div class="k">空位 GAP</div>
+        <div class="v">500<small>–800</small></div>
+        <div class="n">按空位率均分</div>
       </div>
     </div>
   </section>
@@ -199,7 +286,7 @@ footer a:hover{color:var(--verm);border-color:var(--verm)}
 
   <footer>
     <span>钢木实验台拆单工具 · v1.0 · 2026</span>
-    <span>纯前端单文件 · 离线可用 · <a href="app/index.html">进入工具</a></span>
+    <span>纯前端单文件 · 离线可用 · <a href="app/index.html">钢木拆单</a> ／ <a href="app/quangang.html">全钢拆单</a></span>
   </footer>
 
 </div>
