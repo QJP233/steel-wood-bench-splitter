@@ -3,7 +3,7 @@
 > 输入台面尺寸，直接输出柜体组合、空位布局、钢架料单与技术俯视图。
 > 纯前端单文件，无需安装、无需后端、不联网即可使用。
 
-**在线使用：<https://qjp233.github.io/钢木实验台拆单工具/>**
+**在线使用：<https://qjp233.github.io/steel-wood-bench-splitter/>**
 
 ---
 
@@ -24,8 +24,8 @@
 ## 快速开始
 
 ```bash
-git clone https://github.com/QJP233/钢木实验台拆单工具.git
-cd 钢木实验台拆单工具
+git clone https://github.com/QJP233/steel-wood-bench-splitter.git
+cd steel-wood-bench-splitter
 ```
 
 直接用浏览器打开：
