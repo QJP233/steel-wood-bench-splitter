@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>钢木实验台拆单工具</title>
+<meta name="description" content="钢木中央台 / 边台快速拆单：输入台面尺寸，自动给出柜体组合、空位布局、钢架料单与技术俯视图。">
+<style>
+:root{
+  --paper:#f1f1ea; --surface:#fbfbf6; --ink:#15181a; --ink2:#39403f; --muted:#75796f;
+  --rule:#d7d8cd; --rule2:#b3b6a9; --grid:#e4e5da;
+  --steel:#2c5f7c; --verm:#bf4527; --vermSoft:#fbf0eb; --ok:#2c6b4e;
+  --ui:"Bahnschrift","DIN Alternate","HarmonyOS Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"Cascadia Mono","Consolas","SFMono-Regular",ui-monospace,monospace;
+  --ease:cubic-bezier(.165,.84,.44,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{
+  background:var(--paper);color:var(--ink);font-family:var(--ui);font-size:15px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:26px 26px;opacity:.5;
+}
+.wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:56px 28px 72px}
+
+/* 顶部标识 */
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:64px}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand .mark{width:9px;height:9px;background:var(--verm);transform:translateY(-2px)}
+.brand b{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.brand span{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.ver{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--muted);border:1px solid var(--rule2);padding:3px 8px}
+
+/* 主视觉 */
+.hero{margin-bottom:56px}
+.eyebrow{
+  font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--verm);margin-bottom:14px;
+}
+h1{
+  margin:0 0 18px;font-size:clamp(34px,6vw,58px);line-height:1.08;letter-spacing:-.03em;font-weight:600;
+}
+h1 em{font-style:normal;color:var(--verm)}
+.lead{max-width:620px;font-size:15.5px;color:var(--ink2);margin:0 0 32px}
+.lead b{color:var(--ink);font-weight:600}
+
+.cta{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  padding:14px 26px;background:var(--ink);color:#f7f7f2;border:1px solid var(--ink);
+  text-decoration:none;cursor:pointer;transition:all .22s var(--ease);
+}
+.btn:hover{background:var(--verm);border-color:var(--verm);transform:translateY(-1px)}
+.btn .arw{transition:transform .22s var(--ease)}
+.btn:hover .arw{transform:translateX(4px)}
+.btn-ghost{
+  font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  padding:14px 20px;border:1px solid var(--rule2);color:var(--ink2);text-decoration:none;transition:all .22s var(--ease);
+}
+.btn-ghost:hover{border-color:var(--ink);color:var(--ink)}
+
+/* 规格卡 */
+.specs{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;
+  background:var(--rule2);border:1px solid var(--rule2);margin-bottom:56px;
+}
+.spec{background:var(--surface);padding:20px 18px}
+.spec .k{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.spec .v{font-family:var(--mono);font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1.1}
+.spec .v small{font-size:11px;font-weight:400;color:var(--muted);letter-spacing:0;margin-left:3px}
+.spec .n{font-size:11px;color:var(--muted);margin-top:5px}
+.spec.is-key .v{color:var(--steel)}
+
+/* 特性 */
+.sec-title{
+  font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--muted);font-weight:600;margin:0 0 18px;padding-bottom:8px;border-bottom:1px solid var(--rule2);
+}
+.feats{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:26px;margin-bottom:56px}
+.feat h3{margin:0 0 6px;font-size:14px;font-weight:600;display:flex;align-items:baseline;gap:8px}
+.feat h3 i{font-family:var(--mono);font-style:normal;font-size:10px;color:var(--verm);letter-spacing:.1em}
+.feat p{margin:0;font-size:13px;color:var(--muted);line-height:1.7}
+
+/* 流程 */
+.flow{display:flex;align-items:stretch;gap:1px;background:var(--rule2);border:1px solid var(--rule2);margin-bottom:56px}
+.step{background:var(--surface);padding:16px 18px;flex:1;min-width:0}
+.step .no{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--verm);margin-bottom:6px}
+.step .t{font-size:13px;font-weight:600;margin-bottom:3px}
+.step .d{font-size:11.5px;color:var(--muted);line-height:1.6}
+
+/* 页脚 */
+footer{border-top:1px solid var(--rule2);padding-top:20px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--muted)}
+footer a{color:var(--ink2);text-decoration:none;border-bottom:1px solid var(--rule2)}
+footer a:hover{color:var(--verm);border-color:var(--verm)}
+
+@media (max-width:760px){
+  .wrap{padding:36px 20px 56px}
+  .top{margin-bottom:40px}
+  .flow{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="brand">
+      <span class="mark"></span>
+      <b>钢木实验台拆单工具</b>
+      <span>Steel-Wood Bench Splitter</span>
+    </div>
+    <span class="ver">v1.0</span>
+  </div>
+
+  <section class="hero">
+    <div class="eyebrow">Lab Bench · Cutting List Generator</div>
+    <h1>输入台面尺寸<br>直接出<em>拆单清单</em>和<em>钢架料单</em></h1>
+    <p class="lead">
+      面向钢木中央台 / 边台的快速拆单工具。填一个台面长宽，自动算出<b>柜体组合</b>、<b>空位布局</b>、
+      <b>钢架料单</b>，并画出带尺寸链的技术俯视图。纯前端单文件，<b>离线可用</b>，不联网、不上传数据。
+    </p>
+    <div class="cta">
+      <a class="btn" href="app/index.html">进入拆单工具 <span class="arw">→</span></a>
+      <a class="btn-ghost" href="#spec">查看规格口径</a>
+    </div>
+  </section>
+
+  <section id="spec">
+    <div class="specs">
+      <div class="spec is-key">
+        <div class="k">水柜 SINK</div>
+        <div class="v">720<small>×1440×800</small></div>
+        <div class="n">台面 750×1500 含镶边 30</div>
+      </div>
+      <div class="spec">
+        <div class="k">双柜 DOUBLE</div>
+        <div class="v">840<small>/ 1000</small></div>
+        <div class="n">720 深 × 570 高，双门</div>
+      </div>
+      <div class="spec">
+        <div class="k">单柜 SINGLE</div>
+        <div class="v">420<small>/ 500</small></div>
+        <div class="n">720 深 × 570 高，单门</div>
+      </div>
+      <div class="spec">
+        <div class="k">空位 GAP</div>
+        <div class="v">500<small>–800</small></div>
+        <div class="n">余量均分，10mm 步长</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec-title">核心能力</h2>
+    <div class="feats">
+      <div class="feat">
+        <h3><i>01</i>空位数按公式算</h3>
+        <p>空位数 = ROUND（可用排柜长度 × 30% ÷ 500）。基数是扣完水柜后的排柜长度，不是台长。</p>
+      </div>
+      <div class="feat">
+        <h3><i>02</i>布局对齐图纸</h3>
+        <p>先双柜后单柜，空位夹在两个柜体之间，柜体与空位交替不并柜，与工厂图纸样式一致。</p>
+      </div>
+      <div class="feat">
+        <h3><i>03</i>钢架料单自动出</h3>
+        <p>C 型架榀数、30×60 纵梁（模块宽 − 60）、20×40 托梁（柜宽）、封板与可调脚，全部按当前尺寸推算。</p>
+      </div>
+      <div class="feat">
+        <h3><i>04</i>带尺寸链的俯视图</h3>
+        <p>台面总长 / 逐段长度 / 柜体总长 / 柜体深 / 台面宽，五道尺寸链，四周镶边单独着色。</p>
+      </div>
+      <div class="feat">
+        <h3><i>05</i>多方案比选</h3>
+        <p>同一尺寸给出最多 4 套柜体组合，按成本指数与规格种类排序，顶部一键切换。</p>
+      </div>
+      <div class="feat">
+        <h3><i>06</i>一键复制 / 打印</h3>
+        <p>清单可直接粘到 Excel 或微信；打印样式已适配 A4，图纸与清单同页输出。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec-title">使用流程</h2>
+    <div class="flow">
+      <div class="step"><div class="no">STEP 01</div><div class="t">选台型</div><div class="d">中央台 1500 / 边台 750</div></div>
+      <div class="step"><div class="no">STEP 02</div><div class="t">填台面</div><div class="d">长 × 宽，单位 mm</div></div>
+      <div class="step"><div class="no">STEP 03</div><div class="t">选水柜</div><div class="d">无 / 单端 / 双端</div></div>
+      <div class="step"><div class="no">STEP 04</div><div class="t">看结果</div><div class="d">柜体组合 + 空位 + 料单</div></div>
+      <div class="step"><div class="no">STEP 05</div><div class="t">导出</div><div class="d">复制清单 / 打印 PDF</div></div>
+    </div>
+  </section>
+
+  <footer>
+    <span>钢木实验台拆单工具 · v1.0 · 2026</span>
+    <span>纯前端单文件 · 离线可用 · <a href="app/index.html">进入工具</a></span>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>钢木实验台拆单 · Steel-Wood Bench Splitter</title>
+<style>
+:root{
+  --paper:#f1f1ea; --surface:#fbfbf6; --ink:#15181a; --ink2:#39403f; --muted:#75796f;
+  --rule:#d7d8cd; --rule2:#b3b6a9; --grid:#e4e5da;
+  --steel:#2c5f7c; --cab:#1e2326; --cab2:#3c4447;
+  --verm:#bf4527; --vermSoft:#fbf0eb; --ok:#2c6b4e; --okSoft:#eef4f0;
+  --ui:"Bahnschrift","DIN Alternate","HarmonyOS Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"Cascadia Mono","Consolas","SFMono-Regular",ui-monospace,monospace;
+  --ease:cubic-bezier(.165,.84,.44,1);
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden}
+body{background:var(--paper);color:var(--ink);font-family:var(--ui);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:26px 26px;opacity:.5}
+
+.app{position:relative;z-index:1;height:100vh;height:100dvh;display:grid;
+  grid-template-columns:300px minmax(0,1fr);grid-template-rows:50px minmax(0,1fr)}
+
+.bar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:0 16px;background:var(--surface);border-bottom:1px solid var(--rule2)}
+.brand{display:flex;align-items:baseline;gap:10px;min-width:0}
+.brand .mark{width:8px;height:8px;background:var(--verm);flex:0 0 auto;transform:translateY(-2px)}
+.brand h1{margin:0;font-size:16px;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+.brand .en{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.bar-actions{display:flex;gap:6px}
+.btn-s{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  padding:6px 10px;background:transparent;border:1px solid var(--rule2);color:var(--ink2);cursor:pointer;
+  transition:all .2s var(--ease);white-space:nowrap}
+.btn-s:hover{border-color:var(--ink);color:var(--ink)}
+
+.panel{background:var(--surface);border-right:1px solid var(--rule);padding:16px 16px 12px;
+  display:flex;flex-direction:column;gap:14px;min-height:0;overflow-y:auto}
+.panel h2{margin:0 0 -4px;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.field-label{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;letter-spacing:.05em;color:var(--ink2);margin-bottom:2px}
+.field-label span{font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:.12em}
+.pair{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:end;gap:7px}
+.pair-item{display:flex;align-items:baseline;gap:4px;min-width:0;border-bottom:2px solid var(--rule2);transition:border-color .25s var(--ease)}
+.pair-item:focus-within{border-color:var(--ink)}
+.pair-item input{flex:1;min-width:0;border:0;background:transparent;outline:none;font-family:var(--mono);
+  font-size:22px;font-weight:600;letter-spacing:-.02em;color:var(--ink);padding:1px 0 0;font-variant-numeric:tabular-nums;-moz-appearance:textfield}
+.pair-item input::-webkit-outer-spin-button,.pair-item input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.pair-item .unit{font-family:var(--mono);font-size:9.5px;color:var(--muted);padding-bottom:3px}
+.times{font-family:var(--mono);font-size:12px;color:var(--muted);padding-bottom:5px}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.chip{font-family:var(--mono);font-size:10.5px;padding:3px 6px;background:transparent;border:1px solid var(--rule2);
+  color:var(--ink2);cursor:pointer;transition:all .2s var(--ease)}
+.chip:hover{border-color:var(--ink);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#f7f7f2}
+.chip--min{border-color:var(--verm);color:var(--verm)}
+.chip--min[aria-pressed="true"]{background:var(--verm);border-color:var(--verm);color:#fff}
+.segbar{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--rule2)}
+.segbar button{font-family:var(--ui);font-size:12px;padding:6px 3px;background:transparent;border:0;border-right:1px solid var(--rule2);
+  cursor:pointer;color:var(--ink2);transition:all .2s var(--ease);white-space:nowrap}
+.segbar button:last-child{border-right:0}
+.segbar button[aria-pressed="true"]{background:var(--ink);color:#f7f7f2}
+.segbar button:hover:not([aria-pressed="true"]){background:#eeeee6}
+.derived{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-top:8px;
+  background:#efeddf;border-left:2px solid var(--ink);padding:4px 8px}
+.derived span{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.derived b{font-family:var(--mono);font-size:13.5px;font-weight:600}
+.panel-note{margin-top:auto;padding-top:10px;border-top:1px solid var(--rule);font-size:10.5px;color:var(--muted);line-height:1.7}
+.panel-note b{color:var(--ink2)}
+
+.stage{display:flex;flex-direction:column;gap:9px;min-height:0;padding:11px 14px 12px;overflow-y:auto;overflow-x:hidden}
+.stage.is-error{justify-content:center}
+.hero{flex:0 0 auto;background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--ink);padding:9px 14px}
+.hero-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hero-tag{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.hero-tag .sep{color:var(--rule2)}
+.hero-tag b{color:var(--ink)}
+.ok-chip{font-family:var(--mono);font-size:9px;letter-spacing:.1em;padding:2px 6px;border:1px solid var(--ok);color:var(--ok);background:var(--okSoft)}
+.ok-chip.warn{border-color:var(--verm);color:var(--verm);background:var(--vermSoft)}
+.hero-body{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-top:5px;flex-wrap:wrap}
+.hero-main{font-size:19px;font-weight:600;letter-spacing:-.01em;line-height:1.25}
+.hero-main em{font-style:normal;color:var(--verm);font-size:13px;margin:0 2px}
+.kpi{display:flex;gap:16px;flex-wrap:wrap}
+.kpi>div{display:flex;flex-direction:column;gap:1px}
+.kpi span{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.kpi b{font-family:var(--mono);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.kpi .hi b{color:var(--verm)}
+
+.sheet{margin:0;flex:1 1 auto;min-height:280px;display:flex;flex-direction:column;
+  background:var(--surface);border:1px solid var(--rule);position:relative}
+.sheet::before{content:"";position:absolute;top:-1px;left:-1px;width:8px;height:8px;border-top:2px solid var(--ink);border-left:2px solid var(--ink)}
+.sheet::after{content:"";position:absolute;bottom:-1px;right:-1px;width:8px;height:8px;border-bottom:2px solid var(--ink);border-right:2px solid var(--ink)}
+.sheet-head{flex:0 0 auto;display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:5px 12px;border-bottom:1px solid var(--rule)}
+.sheet-head .t{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink2)}
+.sheet-head .s{font-family:var(--mono);font-size:9.5px;color:var(--muted);text-align:right}
+.sheet-body{flex:1 1 auto;min-height:0;display:flex;padding:4px 6px}
+.sheet-body svg{display:block;width:100%;height:100%}
+.sheet-body text{font-family:var(--mono);fill:var(--ink2)}
+.sheet-legend{flex:0 0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:5px 12px;border-top:1px solid var(--rule);font-size:10px;color:var(--muted)}
+.sheet-legend .li{display:flex;align-items:center;gap:4px}
+.sheet-legend i{width:9px;height:9px;display:block;border:1px solid #0f1214}
+.sw--top{background:#e6e4d8;border-color:#a9ada2!important}
+.sw--water{background:#2c5f7c}
+.sw--dbl{background:#1e2326}
+.sw--sgl{background:#3c4447}
+.sw--slot{background:repeating-linear-gradient(45deg,#bf4527 0 1px,#fbfaf5 1px 4px)}
+.sw--edge{background:rgba(191,69,39,.15);border:1px dashed #bf4527!important}
+.sheet-legend .sep{flex:1}
+.sheet-legend .kv{font-family:var(--mono);font-size:9.5px}
+
+.list{flex:0 0 auto;display:flex;flex-direction:column;min-height:0}
+.list table{width:100%;border-collapse:collapse;font-size:12px}
+.list thead th{text-align:left;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);border-bottom:1px solid var(--rule2);padding:0 8px 5px 0;font-weight:600}
+.list tbody td{padding:3px 8px 3px 0;border-bottom:1px solid var(--rule);font-variant-numeric:tabular-nums;font-size:12.5px}
+.list tbody tr:hover{background:#f3f3ec}
+.list td.num{font-family:var(--mono);text-align:right;padding-right:0;white-space:nowrap;font-size:13px;font-weight:600;color:var(--ink)}
+.list td.name{font-weight:600;white-space:nowrap}
+.list td.name .tag{font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:var(--muted);border:1px solid var(--rule2);padding:0 3px;margin-left:5px;vertical-align:1px}
+.list td.spec{font-family:var(--mono);color:var(--ink2);font-size:11.5px}
+.list td.spec .sub{display:block;font-size:9px;color:var(--muted);margin-top:1px}
+.list tr.row--top td{background:#f4f3ec}
+.list tr.row--slot td.name,.list tr.row--slot td.spec{color:var(--verm)}
+.list tr.row--water td.name,.list tr.row--water td.spec{color:var(--steel)}
+.list tr.row--steel td.name{color:var(--steel)}
+.list td.note{font-size:10px;color:var(--muted)}
+.list tfoot td{padding:4px 8px 0 0;font-weight:600;font-size:12px;border:0}
+.list tfoot tr.tot td{background:#efeddf;border-top:1px solid var(--ink);padding:5px 8px 5px 0;font-size:13.5px;font-weight:700}
+.list tfoot tr.tot td.num{font-size:15px}
+.list tfoot td.num{font-family:var(--mono);text-align:right;padding-right:0}
+.list tfoot tr.sub td{font-weight:400;color:var(--muted);font-size:11px;padding-top:2px}
+.list .cap{display:flex;align-items:baseline;justify-content:space-between;gap:8px;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+  padding:10px 0 4px;border-top:1px solid var(--rule2);margin-top:10px}
+.list .cap b{color:var(--ink);font-size:11px;letter-spacing:.04em}
+
+.warn-line{flex:0 0 auto;font-size:11.5px;color:var(--verm);background:var(--vermSoft);border-left:2px solid var(--verm);padding:4px 10px}
+.stage-foot{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:14px;min-width:0}
+.stage-foot .seq{font-family:var(--mono);font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stage-foot .seq i{font-style:normal;color:var(--verm)}
+.btn{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;padding:7px 14px;
+  background:var(--ink);color:#f7f7f2;border:1px solid var(--ink);cursor:pointer;transition:all .2s var(--ease);white-space:nowrap}
+.btn:hover{background:var(--verm);border-color:var(--verm)}
+
+.error-box{border:1px solid var(--verm);background:var(--vermSoft);padding:18px 20px;color:var(--verm);font-size:13.5px;line-height:1.7;max-width:820px}
+.error-box b{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
+.error-box .hint{color:var(--ink2);margin-top:7px;font-size:12.5px}
+.error-box button{margin-top:10px;font-family:var(--mono);font-size:11px;padding:6px 12px;background:var(--verm);color:#fff;border:0;cursor:pointer}
+.error-box ul{margin:8px 0 0;padding-left:18px;color:var(--ink2);font-size:12px}
+
+.modal{position:fixed;inset:0;background:rgba(21,24,26,.42);display:none;align-items:center;justify-content:center;z-index:50;padding:24px}
+.modal.on{display:flex}
+.modal-card{background:var(--surface);border:1px solid var(--ink);max-width:1000px;width:100%;max-height:88vh;display:flex;flex-direction:column}
+.modal-card header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--rule2)}
+.modal-card h3{margin:0;font-size:14px;font-weight:600}
+.modal-card .close{background:transparent;border:0;font-size:20px;line-height:1;color:var(--muted);cursor:pointer}
+.modal-body{padding:16px;overflow-y:auto}
+.cmp{width:100%;border-collapse:collapse;font-size:12px}
+.cmp th{text-align:left;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  border-bottom:1px solid var(--rule2);padding:0 8px 6px 0;font-weight:600}
+.cmp td{padding:7px 8px 7px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+.cmp td.num{font-family:var(--mono);text-align:right;padding-right:0;white-space:nowrap}
+.cmp tr.is-best td{background:#f0f4ee}
+.cmp .sub{display:block;font-size:10px;color:var(--muted);margin-top:2px}
+.cap{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:0 0 6px}
+.rules{margin:16px 0 0;padding:0;list-style:none;font-size:12.5px;color:var(--muted);line-height:1.75}
+.rules li{padding-left:14px;position:relative;margin-bottom:5px}
+.rules li::before{content:"—";position:absolute;left:0;color:var(--rule2)}
+.rules b{color:var(--ink2);font-weight:600}
+.steps{display:flex;flex-direction:column;gap:9px}
+.step{display:grid;grid-template-columns:66px 1fr;gap:10px;align-items:baseline}
+.step .no{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--verm)}
+.step .body{font-size:12.5px;color:var(--ink2);line-height:1.65}
+.step .f{font-family:var(--mono);font-weight:600;color:var(--ink);background:#efeddf;padding:1px 5px}
+.step .r{font-family:var(--mono);font-weight:700;color:var(--ok)}
+.step .m{color:var(--muted);font-size:11px}
+.hint{font-size:11.5px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,10px);background:var(--ink);color:#f7f7f2;
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;padding:8px 16px;opacity:0;pointer-events:none;transition:all .25s var(--ease);z-index:60}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:1100px){.app{grid-template-columns:266px minmax(0,1fr)}.brand .en{display:none}}
+@media print{
+  html,body{height:auto;overflow:visible;background:#fff}
+  body::before{display:none}
+  .app{display:block;height:auto}
+  .bar,.panel,.stage-foot,.modal,.toast{display:none!important}
+  .stage{display:block;padding:0;overflow:visible}
+  .sheet{height:420px;break-inside:avoid;margin-bottom:10px}
+  .list table{font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="bar">
+    <div class="brand">
+      <span class="mark"></span>
+      <h1>钢木实验台拆单</h1>
+      <span class="en">Steel-Wood Bench Splitter</span>
+    </div>
+    <div class="bar-actions">
+      <button class="btn-s" type="button" data-modal="calc">计算过程</button>
+      <button class="btn-s" type="button" data-modal="parts">构件尺寸</button>
+      <button class="btn-s" type="button" data-modal="spec">规格参数</button>
+      <button class="btn-s" type="button" id="btnPrint">打印 / PDF</button>
+    </div>
+  </header>
+
+  <aside class="panel">
+    <h2>输入参数</h2>
+
+    <div class="field">
+      <div class="field-label">台型 <span>BENCH TYPE</span></div>
+      <div class="segbar" id="segType" role="group" aria-label="台型">
+        <button type="button" data-v="中央台" aria-pressed="true">中央台 1500</button>
+        <button type="button" data-v="边台" aria-pressed="false">边台 750</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">台面尺寸 <span>TOP L × W</span></div>
+      <div class="pair">
+        <div class="pair-item"><input id="inLen" type="number" value="4100" min="600" max="20000" step="10" aria-label="台面长度"><span class="unit">mm</span></div>
+        <span class="times">×</span>
+        <div class="pair-item"><input id="inWid" type="number" value="1500" min="600" max="2000" step="10" aria-label="台面宽度"><span class="unit">mm</span></div>
+      </div>
+      <div class="chips" id="presets"></div>
+      <div class="derived" id="derived"></div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">水柜配置 <span>SINK</span></div>
+      <div class="segbar" id="segWater" role="group" aria-label="水柜配置">
+        <button type="button" data-v="0" aria-pressed="false">无</button>
+        <button type="button" data-v="1" aria-pressed="true">单端</button>
+        <button type="button" data-v="2" aria-pressed="false">双端</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">空位率 <span>GAP RATE</span></div>
+      <div class="segbar" id="segRatio" role="group" aria-label="空位率">
+        <button type="button" data-v="0.3" aria-pressed="true">30%</button>
+        <button type="button" data-v="0.35" aria-pressed="false">35%</button>
+        <button type="button" data-v="0.4" aria-pressed="false">40%</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">柜体布置 <span>SIDES</span></div>
+      <div class="segbar" id="segSides" role="group" aria-label="柜体布置">
+        <button type="button" data-v="2" aria-pressed="true">双面对称</button>
+        <button type="button" data-v="1" aria-pressed="false">单面</button>
+      </div>
+    </div>
+
+    <div class="panel-note">
+      <b>空位数 = ROUND（可用排柜长度 × 30% ÷ 500）</b><br>
+      可用排柜长度 = 台长 − 60 − 水柜<br>
+      空位 500–800 浮动，优先夹在两个柜体之间
+    </div>
+  </aside>
+
+  <main class="stage" id="stage" aria-live="polite"></main>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-card">
+    <header><h3 id="modalTitle">计算过程</h3><button class="close" type="button" id="modalClose" aria-label="关闭">×</button></header>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+<div class="toast" id="toast">已复制清单</div>
+
+<script>
+/* =========================================================
+   1. 规格（依据 4500 中央台图纸实测）
+   —— 长度方向台面与端封板齐平，不扣沿边
+   —— 深度方向：中央台前后各 30，边台靠墙侧不扣
+   ========================================================= */
+const OV = 30;            // 台面沿边（中央台四边，边台三边）
+
+const TYPES = {
+  '中央台': { W: 1500, sides: 2, ovD: 2, waterL: 720,  waterD: 1440, nom: '750×1500×800' },
+  '边台':   { W: 750,  sides: 1, ovD: 1, waterL: 1470, waterD: 720,  nom: '1500×750×800' }
+};
+
+/* 柜体固定模块：双柜 1000 / 840，单柜 500 / 420 */
+const CABS = [
+  { L: 1000, doors: 2, name: '双柜' },
+  { L: 840,  doors: 2, name: '双柜' },
+  { L: 500,  doors: 1, name: '单柜' },
+  { L: 420,  doors: 1, name: '单柜' }
+];
+
+const SPEC = {
+  slot: { min: 500, max: 800 },
+  waterH: 800,
+  costDbl: 78, costSgl: 46
+};
+
+const state = { type: '中央台', L: 4500, W: 1500, water: 1, ratio: 0.3, sides: 2, solIndex: 0 };
+
+const T = () => TYPES[state.type];
+const bodyDepth = (W, type) => W - (TYPES[type] || T()).ovD * OV;
+
+/* =========================================================
+   2. 核心算法
+   ========================================================= */
+const fmt = v => Number.isInteger(v) ? String(v) : String(Math.round(v * 10) / 10);
+
+function splitEven(total, n) {
+  if (n <= 0) return [];
+  const step = 10;
+  const base = Math.floor(total / (n * step)) * step;
+  const arr = new Array(n).fill(base);
+  let rest = Math.round(total - base * n), i = 0;
+  while (rest >= step) { arr[i % n] += step; rest -= step; i++; }
+  while (rest > 0) { arr[i % n] += 1; rest -= 1; i++; }
+  return arr;
+}
+
+/** 枚举柜体组合：a×1000 + b×840 + c×500 + Σ空位 = A */
+function solve(A, n) {
+  const out = [];
+  if (A <= 0) return out;
+  for (let a = Math.floor(A / 1000); a >= 0; a--) {
+    for (let b = Math.floor((A - a * 1000) / 840); b >= 0; b--) {
+      for (let c = Math.floor((A - a * 1000 - b * 840) / 500); c >= 0; c--) {
+        for (let d = 0; d <= 8; d++) {
+          if (a + b + c + d === 0) continue;
+          const cab = a * 1000 + b * 840 + c * 500 + d * 420;
+          const rem = A - cab;
+          if (rem < -0.5) continue;
+          const cabs = [
+            ...new Array(a).fill(CABS[0]),
+            ...new Array(b).fill(CABS[1]),
+            ...new Array(c).fill(CABS[2]),
+            ...new Array(d).fill(CABS[3])
+          ];
+          if (n === 0) {
+            if (Math.abs(rem) <= 0.5) out.push({ cabs, k: a + b, m: c + d, slots: [], cabLen: cab, slotSum: 0 });
+            continue;
+          }
+          /* 空位接缝：柜体之间 N−1 个，水柜端头 +1 个（无柜体时只剩水柜缝） */
+          const cap = a + b + c + d - 1 + (state.water >= 1 ? 1 : 0);
+          if (n > cap) continue;
+          if (rem < n * SPEC.slot.min - 0.5) continue;
+          if (rem > n * SPEC.slot.max + 0.5) continue;
+          const slots = splitEven(rem, n);
+          if (slots.some(v => v < SPEC.slot.min || v > SPEC.slot.max)) continue;
+          out.push({ cabs, k: a + b, m: c + d, slots, cabLen: cab, slotSum: rem });
+        }
+      }
+    }
+  }
+  const mid = (SPEC.slot.min + SPEC.slot.max) / 2;
+  const kinds = s => new Set(s.cabs.map(c => c.L)).size;
+  const sig = s => s.cabs.map(c => c.L).sort((a, b) => a - b).join('+');
+  const seen = new Set();
+  return out
+    .filter(s => (seen.has(sig(s)) ? false : (seen.add(sig(s)), true)))
+    .sort((x, y) =>
+      kinds(x) - kinds(y) ||                                    // 规格种类少优先（库房/换型成本）
+      y.k - x.k ||                                              // 双柜优先
+      Math.abs((x.slots[0] || mid) - mid) - Math.abs((y.slots[0] || mid) - mid) ||
+      x.m - y.m);
+}
+
+/** 柜体顺序：双柜居两端、单柜居中，整体对称 */
+/** 先双柜后单柜：双柜按宽度降序排在前，单柜随后 */
+function orderCabs(cabs) {
+  const big = cabs.filter(c => c.doors === 2).sort((a, b) => b.L - a.L);
+  const small = cabs.filter(c => c.doors === 1).sort((a, b) => b.L - a.L);
+  return [...big, ...small];
+}
+
+/**
+ * 空位落位：接缝编号 0 = 水柜与首个柜体之间，i = 第 i-1 与第 i 个柜体之间
+ * 优先落在柜体与柜体之间，柜体不足时才用 0 号缝
+ */
+function arrange(cabs, slots) {
+  const list = orderCabs(cabs);
+  const n = slots.length;
+  if (n === 0) return { seq: list, warnings: [] };
+  const seams = list.map((_, i) => i);          // 0..len-1
+  const inner = seams.filter(i => i >= 1);
+  if (n > seams.length) return { seq: list, warnings: [`最多只能放下 ${seams.length} 个空位`] };
+
+  const picked = new Set();
+  if (n <= inner.length) {
+    if (n === 1) picked.add(inner[Math.floor((inner.length - 1) / 2)]);
+    else for (let i = 0; i < n; i++) picked.add(inner[Math.round(i * (inner.length - 1) / (n - 1))]);
+  } else {
+    inner.forEach(i => picked.add(i));
+    for (let k = 0; picked.size < n; k++) picked.add(k);
+  }
+
+  const seq = [];
+  list.forEach((c, i) => { if (picked.has(i)) seq.push('slot'); seq.push(c); });
+  return { seq, warnings: [], waterSlots: picked.has(0) ? 1 : 0 };
+}
+
+function calc(L) {
+  if (!isFinite(L) || L <= 0) return { error: '请输入有效的台面长度' };
+  /* 台面四边镶边 30：长度两端各扣 30，柜体区 = 台长 − 60 */
+  const bodyL = L - 2 * OV;
+  const waterL = state.water * T().waterL;
+  const A = bodyL - waterL;
+
+  if (A <= 0) return { error: `台长不足以容纳 ${state.water} 个水柜（至少需 ${waterL} mm）` };
+
+  const nRaw = A * state.ratio / 500;
+  const n0 = Math.max(0, Math.round(nRaw));
+
+  const tries = [n0];
+  if (n0 - 1 >= 0) tries.push(n0 - 1);
+  tries.push(n0 + 1);
+
+  for (const n of tries) {
+    const sols = solve(A, n)
+      .map(s => ({ ...s, ...arrange(s.cabs, s.slots) }))
+      .filter(s => s.warnings.length === 0)
+      .sort((x, y) =>
+        x.waterSlots - y.waterSlots ||                                          // ① 空位不贴水柜
+        (x.cabs.length - x.slots.length) - (y.cabs.length - y.slots.length) ||  // ② 柜体与空位交替
+        new Set(x.cabs.map(c => c.L)).size - new Set(y.cabs.map(c => c.L)).size || // ③ 规格种类少
+        y.k - x.k);
+    if (sols.length) {
+      return {
+        ok: true, L, bodyL, A, waterL, nRaw, n0, nUsed: n,
+        note: n === n0 ? '' : `按公式应为 ${n0} 个空位，但配不平，实际采用 ${n} 个。`,
+        sols: sols.slice(0, 4)
+      };
+    }
+  }
+
+  const need = (n0 + 1) * 500 + n0 * SPEC.slot.min;
+  return {
+    error: '当前尺寸无法精确拆单',
+    reasons: [
+      `可用排柜长度 ${A} mm，公式算得 ${n0} 个空位（${n0} × ${SPEC.slot.min}–${SPEC.slot.max}）`,
+      `${n0} 个空位至少需要 ${n0 + 1} 个柜体隔开`,
+      `最短需要 ${need} mm，当前差 ${need - A} mm`
+    ],
+    bodyL, A, n0, nearest: nearestFeasible(L)
+  };
+}
+
+function nearestFeasible(L) {
+  for (const strict of [true, false]) {
+    for (let d = 10; d <= 1200; d += 10) {
+      for (const sign of [-1, 1]) {
+        const t = L + sign * d;
+        if (t < 600) continue;
+        const A = t - 2 * OV - state.water * T().waterL;
+        if (A <= 0) continue;
+        const n = Math.max(0, Math.round(A * state.ratio / 500));
+        for (const c of (strict ? [n] : [n, n - 1, n + 1])) {
+          if (c < 0) continue;
+          if (solve(A, c).length) return t;
+        }
+      }
+    }
+  }
+  return null;
+}
+
+function buildSegments(sol) {
+  const list = [];
+  if (state.water >= 1) list.push({ type: 'water', L: T().waterL, name: '水柜' });
+  let si = 0;
+  sol.seq.forEach(t => {
+    if (t === 'slot') list.push({ type: 'slot', L: sol.slots[si++], name: '空位' });
+    else list.push({ type: 'cab', L: t.L, doors: t.doors, name: t.name });
+  });
+  if (state.water >= 2) list.push({ type: 'water', L: T().waterL, name: '水柜' });
+  return list;
+}
+
+/** 钢架料单：30×60 纵梁 = 模块宽 − 60；20×40 托梁 = 模块宽（空位不配） */
+function frameBOM(segs) {
+  const D = bodyDepth(state.W, state.type);
+  const frames = segs.length + 1;
+  const railMap = new Map(), tieMap = new Map();
+  segs.forEach(sg => {
+    const rl = Math.max(0, Math.round(sg.L - 60));
+    railMap.set(rl, (railMap.get(rl) || 0) + 2);
+    if (sg.type === 'cab') tieMap.set(sg.L, (tieMap.get(sg.L) || 0) + 2);
+  });
+  const rails = [...railMap.entries()].sort((a, b) => b[0] - a[0]);
+  const ties = [...tieMap.entries()].sort((a, b) => b[0] - a[0]);
+  return {
+    frames,
+    rows: [
+      { name: 'C 型架', tag: '30×60', spec: `760 高 × ${D} 深`, qty: `${frames} 榀`, note: `端架 2 + 中间架 ${frames - 2}` },
+      ...rails.map(([L, n]) => ({ name: '顶部纵梁', tag: '30×60', spec: `${L} 长`, qty: `${n} 根`, note: '模块宽 − 60' })),
+      ...ties.map(([L, n]) => ({ name: '前后托梁', tag: '20×40', spec: `${L} 长`, qty: `${n} 根`, note: '柜底满铺' })),
+      { name: '底部横撑', tag: '20×40', spec: '100 长', qty: '4 根', note: '柜体限位' },
+      { name: '封板', tag: '冷板喷塑', spec: `${D} × 730`, qty: '1 块', note: '端封板 / 中央台封板' },
+      { name: '可调脚', tag: 'M12', spec: '60 高', qty: `${frames * 2} 只`, note: '每榀 2 只' }
+    ]
+  };
+}
+
+/* =========================================================
+   3. 俯视图
+   ========================================================= */
+function planSVG(segs, sol, res) {
+  const L = state.L, W = state.W, sides = state.sides;
+  const D = bodyDepth(W, state.type);
+  const VW = 980, M = { l: 100, r: 92, t: 54, b: 196 };
+  const k = Math.min((VW - M.l - M.r) / L, 400 / W);
+  const pw = L * k, ph = W * k;
+  const VH = M.t + ph + M.b;
+  const x0 = (VW - pw) / 2, y0 = M.t, x1 = x0 + pw, y1 = y0 + ph;
+  const bx = x0 + OV * k;
+  const by = sides === 2 ? y0 + OV * k : y0;
+  const bw = res.bodyL * k, bh = D * k;
+  const rowD = sides === 2 ? bh / 2 : bh;
+  const f = n => Math.round(n * 100) / 100;
+  const P = [];
+
+  const hDim = (xa, xb, y, text, side, cls) => {
+    const ty = side === 'above' ? y - 5 : y + 12;
+    return `<line x1="${f(xa)}" y1="${f(y)}" x2="${f(xb)}" y2="${f(y)}" stroke="#a9ada2" stroke-width="1"/>` +
+      `<line x1="${f(xa)}" y1="${f(y - 4)}" x2="${f(xa)}" y2="${f(y + 4)}" stroke="#5c625d" stroke-width="1"/>` +
+      `<line x1="${f(xb)}" y1="${f(y - 4)}" x2="${f(xb)}" y2="${f(y + 4)}" stroke="#5c625d" stroke-width="1"/>` +
+      `<text class="${cls || 'dw-dim'}" x="${f((xa + xb) / 2)}" y="${f(ty)}" text-anchor="middle">${text}</text>`;
+  };
+  const vDim = (x, ya, yb, text, side, cls) => {
+    const ym = (ya + yb) / 2;
+    const tx = side === 'left' ? x - 5 : x + 5;
+    return `<line x1="${f(x)}" y1="${f(ya)}" x2="${f(x)}" y2="${f(yb)}" stroke="#a9ada2" stroke-width="1"/>` +
+      `<line x1="${f(x - 4)}" y1="${f(ya)}" x2="${f(x + 4)}" y2="${f(ya)}" stroke="#5c625d" stroke-width="1"/>` +
+      `<line x1="${f(x - 4)}" y1="${f(yb)}" x2="${f(x + 4)}" y2="${f(yb)}" stroke="#5c625d" stroke-width="1"/>` +
+      `<text class="${cls || 'dw-dim'}" x="${f(tx)}" y="${f(ym)}" text-anchor="middle" dominant-baseline="central" transform="rotate(-90 ${f(tx)} ${f(ym)})">${text}</text>`;
+  };
+  const ext = (x, ya, yb) => `<line x1="${f(x)}" y1="${f(ya)}" x2="${f(x)}" y2="${f(yb)}" stroke="#d5d6cc" stroke-width="1"/>`;
+
+  P.push(`<defs>
+    <pattern id="gapHatch" width="7" height="7" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="0" y2="7" stroke="#bf4527" stroke-width="1.2" opacity=".38"/>
+    </pattern>
+    <style>
+      .dw-dim{font-size:9.5px;fill:#39403f}
+      .dw-sum{font-size:10.5px;fill:#15181a;font-weight:600}
+      .dw-name{font-size:10px;fill:#f7f7f2;font-weight:600}
+      .dw-len{font-size:11px;fill:#f7f7f2;font-weight:600}
+      .dw-slot-name{font-size:10px;fill:#bf4527;font-weight:600}
+      .dw-slot-len{font-size:11px;fill:#bf4527;font-weight:600}
+      .dw-frame{font-size:9px;fill:#2c5f7c;font-weight:600}
+      .dw-rail{font-size:9px;fill:#2c5f7c}
+    </style>
+  </defs>`);
+
+  P.push(`<rect x="${f(x0)}" y="${f(y0)}" width="${f(pw)}" height="${f(ph)}" fill="#e6e4d8" stroke="#15181a" stroke-width="1.4"/>`);
+  P.push(`<rect x="${f(bx)}" y="${f(by)}" width="${f(bw)}" height="${f(bh)}" fill="#fbfaf5" stroke="#a9ada2" stroke-width="1" stroke-dasharray="7 4"/>`);
+
+  let cx = bx;
+  const placed = segs.map(sg => { const o = { sg, x: cx, w: sg.L * k }; cx += o.w; return o; });
+
+  const drawRow = (yTop, handleAtTop) => {
+    placed.forEach(({ sg, x, w }) => {
+      if (sg.type !== 'cab') return;
+      const dbl = sg.doors === 2;
+      P.push(`<rect x="${f(x)}" y="${f(yTop)}" width="${f(w)}" height="${f(rowD)}" fill="${dbl ? '#1e2326' : '#3c4447'}" stroke="#0f1214" stroke-width="1"/>`);
+      const doors = sg.doors;
+      for (let d = 1; d < doors; d++) {
+        const dx = x + (w / doors) * d;
+        P.push(`<line x1="${f(dx)}" y1="${f(yTop)}" x2="${f(dx)}" y2="${f(yTop + rowD)}" stroke="#5b6367" stroke-width="1"/>`);
+      }
+      const hw = Math.min(26, (w / doors) * .5);
+      for (let d = 0; d < doors; d++) {
+        const dc = x + (w / doors) * (d + .5);
+        const hy = handleAtTop ? yTop + 9 : yTop + rowD - 12;
+        P.push(`<rect x="${f(dc - hw / 2)}" y="${f(hy)}" width="${f(hw)}" height="3.2" rx="1.6" fill="#9aa1a4"/>`);
+      }
+      if (w >= 38 && rowD >= 46) {
+        P.push(`<text class="dw-name" x="${f(x + w / 2)}" y="${f(yTop + rowD / 2 - 3)}" text-anchor="middle">${sg.name}</text>`);
+        P.push(`<text class="dw-len" x="${f(x + w / 2)}" y="${f(yTop + rowD / 2 + 13)}" text-anchor="middle">${sg.L}</text>`);
+      } else if (w >= 24) {
+        P.push(`<text class="dw-len" x="${f(x + w / 2)}" y="${f(yTop + rowD / 2 + 4)}" text-anchor="middle" font-size="10.5">${sg.L}</text>`);
+      }
+    });
+  };
+
+  placed.filter(p => p.sg.type === 'slot').forEach(({ sg, x, w }) => {
+    P.push(`<rect x="${f(x)}" y="${f(by)}" width="${f(w)}" height="${f(bh)}" fill="url(#gapHatch)" stroke="#bf4527" stroke-width="1.1" stroke-dasharray="6 4"/>`);
+    if (w >= 40 && bh >= 60) {
+      P.push(`<text class="dw-slot-name" x="${f(x + w / 2)}" y="${f(by + bh / 2 - 4)}" text-anchor="middle">空位</text>`);
+      P.push(`<text class="dw-slot-len" x="${f(x + w / 2)}" y="${f(by + bh / 2 + 12)}" text-anchor="middle">${sg.L}</text>`);
+    } else if (w >= 22) {
+      P.push(`<text class="dw-slot-len" x="${f(x + w / 2)}" y="${f(by + bh / 2 + 4)}" text-anchor="middle" font-size="10.5">${sg.L}</text>`);
+    }
+  });
+
+  placed.filter(p => p.sg.type === 'water').forEach(({ sg, x, w }) => {
+    P.push(`<rect x="${f(x)}" y="${f(by)}" width="${f(w)}" height="${f(bh)}" fill="#2c5f7c" stroke="#123047" stroke-width="1"/>`);
+    const labelSpace = 26;
+    const availH = Math.max(bh - 22 - labelSpace, 22);
+    const sh = Math.min(bh * .38, 78, availH);
+    const sw = Math.min(w * .52, 74, w - 12);
+    const scx = x + w / 2, scy = by + 20 + availH / 2;
+    P.push(`<rect x="${f(scx - sw / 2)}" y="${f(scy - sh / 2)}" width="${f(sw)}" height="${f(sh)}" rx="7" fill="#eaf3f8" stroke="#123047" stroke-width="1"/>`);
+    P.push(`<circle cx="${f(scx)}" cy="${f(scy + sh * .18)}" r="3.2" fill="#123047"/>`);
+    P.push(`<circle cx="${f(scx)}" cy="${f(by + 13)}" r="4.2" fill="none" stroke="#cfe3ee" stroke-width="1.3"/>`);
+    P.push(`<line x1="${f(scx)}" y1="${f(by + 17.2)}" x2="${f(scx)}" y2="${f(scy - sh / 2 - 2)}" stroke="#cfe3ee" stroke-width="1.1"/>`);
+    if (w >= 50 && bh >= 120) {
+      P.push(`<text class="dw-name" x="${f(scx)}" y="${f(by + bh - 24)}" text-anchor="middle">水柜</text>`);
+      P.push(`<text class="dw-len" x="${f(scx)}" y="${f(by + bh - 10)}" text-anchor="middle">${sg.L}</text>`);
+    } else if (w >= 40) {
+      P.push(`<text class="dw-len" x="${f(scx)}" y="${f(by + bh - 8)}" text-anchor="middle" font-size="10">水柜 ${sg.L}</text>`);
+    } else {
+      P.push(`<text class="dw-len" x="${f(scx)}" y="${f(by + bh - 8)}" text-anchor="middle" font-size="9.5">${sg.L}</text>`);
+    }
+  });
+
+  drawRow(by, true);
+  if (sides === 2) drawRow(by + bh - rowD, false);
+
+  /* ---------- 四周镶边 30（覆盖在最上层） ---------- */
+  const ow = OV * k;
+  const bandFill = "rgba(191,69,39,.13)";
+  const bandStroke = "#bf4527";
+  P.push(`<g stroke="${bandStroke}" stroke-width=".9" stroke-dasharray="5 3" fill="${bandFill}">
+    <rect x="${f(x0)}" y="${f(y0)}" width="${f(pw)}" height="${f(ow)}"/>
+    <rect x="${f(x0)}" y="${f(y1 - ow)}" width="${f(pw)}" height="${f(ow)}"/>
+    <rect x="${f(x0)}" y="${f(y0)}" width="${f(ow)}" height="${f(ph)}"/>
+    <rect x="${f(x1 - ow)}" y="${f(y0)}" width="${f(ow)}" height="${f(ph)}"/>
+  </g>`);
+
+  P.push(ext(x0, y0 - 5, y0 - 30), ext(x1, y0 - 5, y0 - 30));
+  P.push(hDim(x0, x1, y0 - 26, `台面 ${fmt(L)}`, 'above', 'dw-sum'));
+
+  let dx = bx;
+  segs.forEach(sg => {
+    const w = sg.L * k;
+    P.push(ext(dx, y1 + 5, y1 + 34));
+    P.push(hDim(dx, dx + w, y1 + 28, `${sg.L}`, 'below'));
+    dx += w;
+  });
+  P.push(ext(bx + bw, y1 + 5, y1 + 34));
+  P.push(hDim(bx, bx + bw, y1 + 60, `柜体 ${fmt(res.bodyL)}`, 'below', 'dw-sum'));
+
+  P.push(vDim(x0 - 22, by, by + bh, `${fmt(D)}`, 'left'));
+  P.push(vDim(x1 + 28, y0, y1, `${fmt(W)}`, 'right'));
+
+  /* ---------- 钢架布置条 ---------- */
+  const fy = y1 + 96;
+  const fb2 = frameBOM(segs);
+  P.push(`<text class="dw-sum" x="${f(x0)}" y="${f(fy - 24)}">钢架布置 · ${fb2.frames} 榀 C 型架（端架 2 + 中间架 ${fb2.frames - 2}）</text>`);
+  P.push(`<line x1="${f(bx)}" y1="${f(fy)}" x2="${f(bx + bw)}" y2="${f(fy)}" stroke="#2c5f7c" stroke-width="1.6" opacity=".55"/>`);
+
+  /* 架位 = 每个模块边界 */
+  const fx = [];
+  let px = bx;
+  fx.push(px);
+  segs.forEach(sg => { px += sg.L * k; fx.push(px); });
+
+  fx.forEach((x, i) => {
+    const first = i === 0, last = i === fx.length - 1;
+    P.push(`<rect x="${f(x - 3)}" y="${f(fy - 15)}" width="6" height="30" fill="#2c5f7c"/>`);
+    P.push(`<text class="dw-frame" x="${f(x)}" y="${f(fy + 26)}" text-anchor="middle">${first ? '端' : last ? '端' : 'C' + i}</text>`);
+  });
+
+  /* 跨距（纵梁净长 = 模块宽 − 60） */
+  let sx = bx;
+  segs.forEach((sg, i) => {
+    const w = sg.L * k;
+    if (w > 30) {
+      P.push(`<text class="dw-rail" x="${f(sx + w / 2)}" y="${f(fy - 8)}" text-anchor="middle">${Math.round(sg.L - 60)}</text>`);
+    }
+    sx += w;
+  });
+
+  /* 水柜段单独标注 */
+  P.push(`<text class="dw-dim" x="${f(bx + T().waterL * k / 2)}" y="${f(fy + 44)}" text-anchor="middle">水柜段无纵梁</text>`);
+
+  return `<figure class="sheet">
+    <div class="sheet-head">
+      <span class="t">${state.type}俯视图 · PLAN</span>
+      <span class="s">${sides === 2 ? '双面对称' : '单面'} ｜ 单位 mm ｜ 尺寸以标注为准</span>
+    </div>
+    <div class="sheet-body">
+      <svg viewBox="0 0 ${VW} ${f(VH)}" role="img" aria-label="${state.type}俯视图，台面 ${L}×${W} 毫米">${P.join('')}</svg>
+    </div>
+    <div class="sheet-legend">
+      <span class="li"><i class="sw sw--top"></i>台面</span>
+      <span class="li"><i class="sw sw--water"></i>水柜</span>
+      <span class="li"><i class="sw sw--dbl"></i>双柜</span>
+      <span class="li"><i class="sw sw--sgl"></i>单柜</span>
+      <span class="li"><i class="sw sw--slot"></i>空位</span>
+      <span class="li"><i class="sw sw--edge"></i>镶边 ${OV}</span>
+      <span class="sep"></span>
+      <span class="kv">水柜 ${T().waterL}×${T().waterD}（台面 ${T().nom}） ｜ 柜体深 ${D} ｜ 空位 ${SPEC.slot.min}–${SPEC.slot.max}</span>
+      <span class="kv" style="color:var(--steel)">钢架 C 型架 ${frameBOM(segs).frames} 榀 ｜ 纵梁 30×60 = 模块宽 − 60 ｜ 托梁 20×40 = 柜宽</span>
+    </div>
+  </figure>`;
+}
+
+/* =========================================================
+   4. 渲染
+   ========================================================= */
+const $ = s => document.querySelector(s);
+
+function render() {
+  const stage = $('#stage');
+  paintPresets();
+  const res = calc(state.L);
+
+  if (res.error) {
+    $('#derived').style.display = 'none';
+    stage.classList.add('is-error');
+    stage.innerHTML = `
+      <div class="hero">
+        <div class="hero-head"><div class="hero-tag"><span>无法拆单</span></div></div>
+        <div class="hero-body"><div class="hero-main" style="color:var(--verm)">${res.error}</div></div>
+      </div>
+      <div class="error-box">
+        <b>No feasible split</b>
+        台面 ${state.L} × ${state.W}，可用排柜长度 ${res.A ?? '—'} mm。
+        <ul>${(res.reasons || []).map(r => `<li>${r}</li>`).join('')}</ul>
+        ${res.nearest ? `<div class="hint">最近可行台面长度：<strong style="font-family:var(--mono)">${res.nearest} mm</strong></div>
+          <button type="button" id="btnFix">采用 ${res.nearest} mm 重新计算</button>` : ''}
+      </div>`;
+    const fix = $('#btnFix');
+    if (fix) fix.onclick = () => { state.L = res.nearest; $('#inLen').value = res.nearest; render(); };
+    return;
+  }
+
+  stage.classList.remove('is-error');
+  if (state.solIndex >= res.sols.length) state.solIndex = 0;
+  const sol = res.sols[state.solIndex];
+  const segs = buildSegments(sol);
+  const total = segs.reduce((a, s) => a + s.L, 0);
+  const sides = state.sides;
+  const uniq = [...new Set(sol.slots)];
+  const cost = sol.k * SPEC.costDbl + sol.m * SPEC.costSgl;
+  const minCost = Math.min(...res.sols.map(s => s.k * SPEC.costDbl + s.m * SPEC.costSgl));
+  const closed = total === res.bodyL;
+
+  const tabs = res.sols.length > 1 ? res.sols.map((s, i) =>
+    `<button class="chip" type="button" data-i="${i}" aria-pressed="${i === state.solIndex}">${String.fromCharCode(65 + i)} · ${s.cabLen}+${s.slots.length}空</button>`).join('') : '';
+
+  const parts = [];
+  const byW = {};
+  sol.cabs.forEach(c => { byW[c.L] = (byW[c.L] || 0) + 1; });
+  Object.keys(byW).map(Number).sort((a, b) => b - a).forEach(L => {
+    parts.push(`${byW[L]} × ${L === 500 ? '单柜' : '双柜'} ${L}`);
+  });
+  if (sol.slots.length) parts.push(`${sol.slots.length} × 空位 ${uniq.join('/')}`);
+
+  const head = `
+    <div class="hero">
+      <div class="hero-head">
+        <div class="hero-tag">
+          <span>方案 ${String.fromCharCode(65 + state.solIndex)}</span>
+          <span class="sep">/</span><span>${state.type} · ${sides === 2 ? '双面' : '单面'}</span>
+          <span class="sep">/</span><span>成本 <b>${cost}</b>${cost === minCost && res.sols.length > 1 ? ' 最低' : ''}</span>
+          <span class="sep"></span><span class="ok-chip ${closed ? '' : 'warn'}">${closed ? '✓' : '!'} 合计 ${fmt(total)}</span>
+        </div>
+        <div class="hero-tag" style="gap:4px">${tabs}</div>
+      </div>
+      <div class="hero-body">
+        <div class="hero-main">${parts.join(' <em>+</em> ')}</div>
+        <div class="kpi">
+          <div><span>台面</span><b>${state.L}×${state.W}</b></div>
+          <div><span>柜体区</span><b>${res.bodyL}×${bodyDepth(state.W, state.type)}</b></div>
+          <div><span>可用排柜</span><b>${res.A}</b></div>
+          <div class="hi"><span>空位</span><b>${sol.slots.length ? `${sol.slots.length}×${uniq.join('/')}` : '—'}</b></div>
+        </div>
+      </div>
+    </div>`;
+
+  const rows = [];
+  rows.push({ cls: 'row--top', name: '台面', tag: 'TOP', spec: `${state.L}×${state.W}×12.7`, sub: `四边镶边 ${OV}`, qty: '1', sum: state.L });
+  if (state.water >= 1) rows.push({ cls: 'row--water', name: '水柜', tag: 'SINK', spec: `${T().waterL}×${T().waterD}×${SPEC.waterH}`, sub: `台面 ${T().nom}（含镶边 ${OV}）`, qty: String(state.water), sum: state.water * T().waterL, dbl: 1 });
+  Object.keys(byW).map(Number).sort((a, b) => b - a).forEach(L => {
+    const c = CABS.find(x => x.L === L);
+    rows.push({ cls: '', name: c.name, tag: c.doors === 2 ? 'DBL' : 'SGL', spec: `${L}×${bodyDepth(state.W, state.type) / (sides === 2 ? 2 : 1)}×570`, qty: String(byW[L]), sum: byW[L] * L, dbl: 1 });
+  });
+  const groups = {};
+  sol.slots.forEach(l => { groups[l] = (groups[l] || 0) + 1; });
+  Object.keys(groups).map(Number).sort((a, b) => a - b).forEach(l => {
+    rows.push({ cls: 'row--slot', name: '空位', tag: 'GAP', spec: `${l}`, qty: String(groups[l]), sum: groups[l] * l });
+  });
+
+  const list = `
+    <section class="list">
+      <table>
+        <thead><tr>
+          <th>名称</th><th>规格 / 尺寸 (mm)</th>
+          <th style="text-align:right">数量${sides === 2 ? '（单侧）' : ''}</th>
+          <th style="text-align:right">长度小计</th>
+        </tr></thead>
+        <tbody>${rows.map(r => `<tr class="${r.cls}">
+          <td class="name">${r.name}<span class="tag">${r.tag}</span></td>
+          <td class="spec">${r.spec}${r.sub ? `<span class="sub">${r.sub}</span>` : ''}</td>
+          <td class="num">${r.qty}${sides === 2 && r.dbl ? '<span style="color:var(--muted);font-size:10px"> ×2</span>' : ''}</td>
+          <td class="num">${fmt(r.sum)}</td></tr>`).join('')}</tbody>
+        <tfoot>
+          <tr class="tot"><td colspan="3">柜体合计（单侧）</td><td class="num">${fmt(total)}</td></tr>
+          <tr class="sub"><td colspan="3">＝ 柜体区 ${res.bodyL}（台长 ${state.L} − 镶边 ${2 * OV}）</td><td class="num">${closed ? '✓' : '!'}</td></tr>
+        </tfoot>
+      </table>
+    </section>`;
+
+  const fb = frameBOM(segs);
+  const frameList = `
+    <section class="list">
+      <div class="cap"><span>钢架料单 / <b>STEEL FRAME</b></span><span>${fb.frames} 榀 C 型架</span></div>
+      <table>
+        <thead><tr><th>件号</th><th>名称</th><th>规格 / 长度 (mm)</th><th style="text-align:right">数量</th><th>说明</th></tr></thead>
+        <tbody>${fb.rows.map((r, i) => `<tr class="row--steel">
+          <td class="num" style="text-align:left;color:var(--muted);font-weight:400">${String(i + 1).padStart(2, '0')}</td>
+          <td class="name">${r.name}<span class="tag">${r.tag}</span></td>
+          <td class="spec">${r.spec}</td>
+          <td class="num">${r.qty}</td>
+          <td class="note">${r.note}</td></tr>`).join('')}</tbody>
+      </table>
+    </section>`;
+
+  const seqText = segs.map(sg => sg.type === 'slot' ? `<i>${sg.name}${sg.L}</i>` : `${sg.name}${sg.L}`).join(' · ');
+  const foot = `<div class="stage-foot"><span class="seq">${seqText}</span><button class="btn" id="btnCopy" type="button">复制清单</button></div>`;
+
+  stage.innerHTML = head + (res.note ? `<div class="warn-line">${res.note}</div>` : '')
+    + planSVG(segs, sol, res) + list + frameList + foot;
+
+  $('#derived').style.display = '';
+  $('#derived').innerHTML = `<span>可用排柜</span><b>${res.A} mm</b>`;
+  $('#derived').title = `台长 − 水柜 ${res.waterL}`;
+
+  stage.querySelectorAll('.chip[data-i]').forEach(b => {
+    b.onclick = () => { state.solIndex = Number(b.dataset.i); render(); };
+  });
+  $('#btnCopy').onclick = () => copyList(res, sol, segs, total);
+}
+
+/* =========================================================
+   5. 弹层
+   ========================================================= */
+function openModal(kind) {
+  const modal = $('#modal'), title = $('#modalTitle'), body = $('#modalBody');
+  const res = calc(state.L);
+  const D = bodyDepth(state.W, state.type);
+
+  if (kind === 'calc') {
+    title.textContent = '计算过程';
+    if (res.error) { body.innerHTML = `<p class="hint">${res.error}</p>`; modal.classList.add('on'); return; }
+    const sol = res.sols[state.solIndex];
+    const segs = buildSegments(sol);
+    const sum = segs.reduce((a, b) => a + b.L, 0);
+    body.innerHTML = `
+      <div class="steps">
+        <div class="step"><span class="no">STEP 01</span><span class="body">台面 ${state.L} × ${state.W}，最外侧镶边 ${OV} → 柜体区 <span class="f">${res.bodyL}</span> × <span class="f">${D}</span> mm</span></div>
+        <div class="step"><span class="no">STEP 02</span><span class="body">扣水柜 ${state.water} × ${T().waterL} → 可用排柜长度 <span class="f">${res.bodyL} − ${res.waterL} = ${res.A}</span> mm</span></div>
+        <div class="step"><span class="no">STEP 03</span><span class="body">空位数 = <b>可用排柜长度</b> ${res.A} × ${state.ratio * 100}% ÷ 500 = <span class="f">${res.nRaw.toFixed(2)}</span> <span class="m">→ 四舍五入</span> <span class="r">${res.n0} 个</span></span></div>
+        <div class="step"><span class="no">STEP 04</span><span class="body">柜体长度 = ${res.A} − ${sol.slotSum} = <span class="f">${sol.cabLen}</span> mm → ${sol.cabs.map(c => c.L).join(' ＋ ')}</span></div>
+        <div class="step"><span class="no">STEP 05</span><span class="body">空位宽 = ${sol.slotSum} ÷ ${sol.slots.length} = <span class="f">${sol.slots.join(' / ')}</span> mm <span class="m">（限 ${SPEC.slot.min}–${SPEC.slot.max}）</span></span></div>
+        <div class="step"><span class="no">STEP 06</span><span class="body">合验：${segs.map(s => s.L).join(' + ')} = <span class="f">${sum}</span> ＝ 柜体区 ${res.bodyL} <span class="r">${sum === res.bodyL ? '✓' : '✗'}</span></span></div>
+      </div>
+      <ul class="rules">
+        <li><b>空位数</b> = ROUND（可用排柜长度 × ${state.ratio * 100}% ÷ 500）。基数是<b>扣完水柜后的排柜长度</b>。</li>
+        <li><b>台面四边镶边 30</b>：柜体区 = 台长 − 60；水柜 750 含镶边 → 柜体 720。</li>
+        <li>空位必须<b>夹在两个柜体之间</b>：${sol.slots.length} 个空位至少需要 ${sol.slots.length + 1} 个柜体。</li>
+        <li>空位宽在 <b>${SPEC.slot.min}–${SPEC.slot.max}</b> mm 内均分（5mm 步长），保证总长严格闭合。</li>
+        <li>柜体固定模块：<b>双柜 840 / 1000，单柜 420 / 500</b>；布局<b>先双柜后单柜</b>。</li>
+        <li>柜体按${state.sides === 2 ? '双面对称' : '单面'}布置；清单数量为单侧值，双面时 ×2 下单。</li>
+        <li>水柜 ${T().waterL}×${T().waterD} 固定端头：台面 750×1500 − 镶边 ${OV} ＝ 柜体 ${T().waterL}×${T().waterD}。</li>
+      </ul>`;
+  } else if (kind === 'parts') {
+    title.textContent = '构件尺寸 · 柜体与钢架';
+    const fb = res.ok ? frameBOM(buildSegments(res.sols[state.solIndex] || res.sols[0])) : null;
+    body.innerHTML = `
+      <table class="cmp">
+        <thead><tr><th>构件</th><th>规格（长×宽×高 mm）</th><th style="text-align:right">沿台长</th><th style="text-align:right">进深</th></tr></thead>
+        <tbody>
+          <tr><td><b>单柜</b><span class="sub">单门，外盖门</span></td><td class="num">500 / 420 × ${D / (state.sides === 2 ? 2 : 1)} × 570</td><td class="num">500 / 420</td><td class="num">${D / (state.sides === 2 ? 2 : 1)}</td></tr>
+          <tr><td><b>双柜</b><span class="sub">双门，840 为主力</span></td><td class="num">1000 / 840 × ${D / (state.sides === 2 ? 2 : 1)} × 570</td><td class="num">1000 / 840</td><td class="num">${D / (state.sides === 2 ? 2 : 1)}</td></tr>
+          <tr><td><b>水柜</b><span class="sub">满进深，单/双槽 + 龙头</span></td><td class="num">${T().waterL} × ${T().waterD} × ${SPEC.waterH}<span class="sub">台面 ${T().nom}，柜体扣镶边 ${OV}</span></td><td class="num">${T().waterL}</td><td class="num">${T().waterD}</td></tr>
+          <tr><td><b>空位</b><span class="sub">座位，两端必须是柜体</span></td><td class="num">${SPEC.slot.min}–${SPEC.slot.max} × ${D}</td><td class="num">${SPEC.slot.min}–${SPEC.slot.max}</td><td class="num">${D}</td></tr>
+          <tr class="is-best"><td><b>台面</b><span class="sub">12.7 实芯理化板，镶四边</span></td><td class="num">L × ${state.W} × 12.7</td><td class="num">L</td><td class="num">${state.W}</td></tr>
+        </tbody>
+      </table>
+      <div class="cap" style="margin-top:16px">钢架料单（本单 ${fb ? fb.frames : '—'} 榀）</div>
+      ${fb ? `<table class="cmp">
+        <thead><tr><th>件号</th><th>名称</th><th>规格 / 长度 (mm)</th><th style="text-align:right">数量</th><th>说明</th></tr></thead>
+        <tbody>${fb.rows.map((r, i) => `<tr>
+          <td class="num" style="text-align:left">${String(i + 1).padStart(2, '0')}</td>
+          <td><b>${r.name}</b><span class="sub">${r.tag}</span></td>
+          <td class="num">${r.spec}</td><td class="num">${r.qty}</td><td class="sub">${r.note}</td></tr>`).join('')}</tbody>
+      </table>` : `<p class="hint">当前尺寸无解，无法生成钢架料单</p>`}
+      <div class="cap" style="margin-top:16px">钢架如何布置</div>
+      <ul class="rules">
+        <li><b>① 立架</b>：C 型架立在每个<b>模块交界处</b>（柜体 / 空位边界），前后各一根 30×60 立柱，顶部与底部各一道 30×60 横梁，构成门型。</li>
+        <li><b>② 连梁</b>：相邻两榀架之间，<b>上下各一道 30×60 纵梁</b>，前后两面共 4 道；净长 = 模块宽 − 60（图纸 780 = 840 − 60）。</li>
+        <li><b>③ 托梁</b>：每个柜体底部加 20×40 前后托梁，长度 = 柜宽（840 / 500 / 420），<b>空位不配托梁</b>。</li>
+        <li><b>④ 封板</b>：两端加 ${D}×730 端封板，中央台另加中封板；台面四周沿边 30 压住封板。</li>
+        <li><b>⑤ 可调脚</b>：每榀架底 2 只 M12 可调脚，柜体底距地 160。</li>
+        <li><b>高度链</b>：800 = 台面 25 + 垫条 15 + 横梁 30 + 柜体 570 + 底净空 160；水柜落地 800。</li>
+        <li><b>深度链</b>：台面 ${state.W} − 沿边 ${OV}×${T().ovD} = 柜体区 ${D}，C 型架深向横梁同长。</li>
+      </ul>`;
+  } else {
+    title.textContent = '规格参数';
+    body.innerHTML = `
+      <table class="cmp">
+        <thead><tr><th>模块</th><th>长</th><th>深</th><th>高</th></tr></thead>
+        <tbody>
+          <tr><td><b>水柜</b><span class="sub">台面 ${T().nom}，柜体扣镶边 ${OV}</span></td><td class="num">${T().waterL}</td><td class="num">${T().waterD}</td><td class="num">${SPEC.waterH}</td></tr>
+          <tr><td><b>双柜</b></td><td class="num">1000 / 840</td><td class="num">${D / (state.sides === 2 ? 2 : 1)}</td><td class="num">570</td></tr>
+          <tr><td><b>单柜</b></td><td class="num">500 / 420</td><td class="num">${D / (state.sides === 2 ? 2 : 1)}</td><td class="num">570</td></tr>
+          <tr><td><b>空位</b></td><td class="num">${SPEC.slot.min}–${SPEC.slot.max}</td><td class="num">${D}</td><td class="num">—</td></tr>
+        </tbody>
+      </table>
+      <ul class="rules">
+        <li><b>台面四边镶边 30</b>：柜体区 = 台长 − 60；水柜 750 含镶边 → 柜体 720。</li>
+        <li>空位率 <b>${state.ratio * 100}%</b>，计算单位 <b>500</b> mm，基数 = 可用排柜长度。</li>
+        <li>成本指数：双柜 ${SPEC.costDbl} / 单柜 ${SPEC.costSgl}（仅用于方案比选）。</li>
+        <li>改尺寸请编辑本文件顶部 <b>CABS / TYPES</b> 常量。</li>
+      </ul>`;
+  }
+  modal.classList.add('on');
+}
+
+/* =========================================================
+   6. 复制 / 事件
+   ========================================================= */
+function copyList(res, sol, segs, total) {
+  const S = state, mul = S.sides === 2 ? 2 : 1;
+  const fb = frameBOM(segs);
+  const byW = {};
+  sol.cabs.forEach(c => { byW[c.L] = (byW[c.L] || 0) + 1; });
+  const lines = [
+    `【钢木${S.type}拆单】台面 ${S.L} × ${S.W} mm（总高 800）`,
+    `柜体区 ${res.bodyL} × ${bodyDepth(S.W, S.type)} ｜ 可用排柜 ${res.A} ｜ ${S.sides === 2 ? '双面对称' : '单面'}`,
+    '',
+    `台面　${S.L}×${S.W}×12.7　×1`,
+    ...(S.water ? [`水柜　${T().waterL}×${T().waterD}×${SPEC.waterH}　×${S.water}`] : []),
+    ...Object.keys(byW).map(Number).sort((a, b) => b - a).map(L => {
+      const c = CABS.find(x => x.L === L);
+      return `${c.name}　${L}×${bodyDepth(S.W, S.type) / (S.sides === 2 ? 2 : 1)}×570　×${byW[L] * mul}`;
+    }),
+    ...sol.slots.map((l, i) => `空位${i + 1}　${l}${S.sides === 2 ? '（两侧各一）' : ''}`),
+    '',
+    `单侧长度合计 ${total} ＝ 柜体区 ${res.bodyL}（＋ 末端镶边 ${OV} ＝ 台长 ${S.L}）`,
+    `空位数 ${sol.slots.length}（可用排柜 ${res.A} × ${S.ratio * 100}% ÷ 500 = ${res.nRaw.toFixed(2)}）`,
+    `排布：${segs.map(s => `${s.name}${s.L}`).join(' | ')}`,
+    '',
+    `【钢架料单】${fb.frames} 榀 C 型架`,
+    ...fb.rows.map(r => `${r.name}（${r.tag}）　${r.spec}　×${r.qty}　${r.note}`)
+  ];
+  const text = lines.join('\n');
+  const done = () => { const t = $('#toast'); t.classList.add('on'); setTimeout(() => t.classList.remove('on'), 1600); };
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { alert(text); }
+    document.body.removeChild(ta);
+  };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done).catch(fallback);
+  else fallback();
+}
+
+const PRESETS = [2400, 3000, 3600, 4100, 4500, 5000, 5500];
+let _minKey = '', _minVal = null;
+function minFeasible() {
+  const key = `${state.type}|${state.water}|${state.ratio}`;
+  if (key === _minKey) return _minVal;
+  let v = null;
+  for (let t = 600; t <= 7000; t += 10) {
+    const A = t - 2 * OV - state.water * T().waterL;
+    if (A <= 0) continue;
+    const n = Math.max(0, Math.round(A * state.ratio / 500));
+    if (solve(A, n).some(x => x.slots.length > 0)) { v = t; break; }
+  }
+  _minKey = key; _minVal = v;
+  return v;
+}
+
+function paintPresets() {
+  const box = $('#presets');
+  const key = `${state.type}|${state.water}|${state.ratio}|${state.L}`;
+  if (box.dataset.k === key) return;
+  box.dataset.k = key;
+  const mn = minFeasible();
+  const okPresets = PRESETS.filter(v => !calc(v).error);
+  const list = [...new Set([...(mn ? [mn] : []), ...okPresets])];
+  box.innerHTML = list.map(v =>
+    `<button class="chip${v === mn ? ' chip--min' : ''}" type="button" data-v="${v}" aria-pressed="${v === state.L}">${v === mn ? '最小 ' + v : v}</button>`).join('');
+  box.querySelectorAll('.chip').forEach(b => {
+    b.onclick = () => { state.L = Number(b.dataset.v); $('#inLen').value = state.L; state.solIndex = 0; render(); };
+  });
+}
+
+function bind() {
+  $('#inLen').addEventListener('input', e => { state.L = Number(e.target.value) || 0; state.solIndex = 0; render(); });
+  $('#inWid').addEventListener('input', e => { state.W = Number(e.target.value) || 0; render(); });
+
+  const seg = (id, key, num, after) => {
+    $('#' + id).querySelectorAll('button').forEach(b => {
+      b.onclick = () => {
+        $('#' + id).querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+        state[key] = num ? Number(b.dataset.v) : b.dataset.v;
+        state.solIndex = 0;
+        if (after) after(b.dataset.v);
+        render();
+      };
+    });
+  };
+
+  seg('segType', 'type', false, v => {
+    state.W = TYPES[v].W;
+    state.sides = TYPES[v].sides;
+    $('#inWid').value = state.W;
+    $('#segSides').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(Number(x.dataset.v) === state.sides)));
+  });
+  seg('segWater', 'water', true);
+  seg('segRatio', 'ratio', true);
+  seg('segSides', 'sides', true);
+
+  document.querySelectorAll('[data-modal]').forEach(b => { b.onclick = () => openModal(b.dataset.modal); });
+  $('#modalClose').onclick = () => $('#modal').classList.remove('on');
+  $('#modal').onclick = e => { if (e.target.id === 'modal') $('#modal').classList.remove('on'); };
+  $('#btnPrint').onclick = () => window.print();
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') $('#modal').classList.remove('on'); });
+}
+
+bind();
+render();
+
+</script>
+</body>
+</html>
